@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User, X, TrendingUp, Shuffle, Volume2, Clock, Pause, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -66,7 +66,22 @@ export default function InstantSounds() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [sounds]);
 
-  // Auto-play logic
+  // Filtered sounds (using useMemo)
+  const filteredSounds = useMemo(() => {
+    return sounds
+      .filter(sound => {
+        const matchesSearch = sound.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              sound.category.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCountry = activeCountry === "All" || sound.country === activeCountry;
+        const matchesCategory = activeCategory === "All" || sound.category === activeCategory;
+        return matchesSearch && matchesCountry && matchesCategory;
+      })
+      .sort((a, b) => sortBy === "popular" ? b.plays - a.plays : b.id - a.id);
+  }, [sounds, searchTerm, activeCountry, activeCategory, sortBy]);
+
+  const favoriteSounds = sounds.filter(s => favorites.includes(s.id));
+
+  // Auto-play logic (now filteredSounds is defined before this)
   useEffect(() => {
     if (isAutoPlaying) {
       autoPlayIntervalRef.current = setInterval(() => {
@@ -85,18 +100,6 @@ export default function InstantSounds() {
       if (autoPlayIntervalRef.current) clearInterval(autoPlayIntervalRef.current);
     };
   }, [isAutoPlaying, filteredSounds]);
-
-  const filteredSounds = sounds
-    .filter(sound => {
-      const matchesSearch = sound.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            sound.category.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCountry = activeCountry === "All" || sound.country === activeCountry;
-      const matchesCategory = activeCategory === "All" || sound.category === activeCategory;
-      return matchesSearch && matchesCountry && matchesCategory;
-    })
-    .sort((a, b) => sortBy === "popular" ? b.plays - a.plays : b.id - a.id);
-
-  const favoriteSounds = sounds.filter(s => favorites.includes(s.id));
 
   // Play sound + Increase play count
   const playSound = (sound: Sound) => {
