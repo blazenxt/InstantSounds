@@ -66,7 +66,7 @@ export default function InstantSounds() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [sounds]);
 
-  // Filtered sounds (using useMemo)
+  // Filtered sounds
   const filteredSounds = useMemo(() => {
     return sounds
       .filter(sound => {
@@ -81,7 +81,7 @@ export default function InstantSounds() {
 
   const favoriteSounds = sounds.filter(s => favorites.includes(s.id));
 
-  // Auto-play logic (now filteredSounds is defined before this)
+  // Auto-play logic
   useEffect(() => {
     if (isAutoPlaying) {
       autoPlayIntervalRef.current = setInterval(() => {
@@ -101,7 +101,6 @@ export default function InstantSounds() {
     };
   }, [isAutoPlaying, filteredSounds]);
 
-  // Play sound + Increase play count
   const playSound = (sound: Sound) => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const osc1 = audioContext.createOscillator();
@@ -134,7 +133,6 @@ export default function InstantSounds() {
       setPlayingId(null);
     }, duration);
 
-    // Increment play count
     setSounds(prevSounds =>
       prevSounds.map(s =>
         s.id === sound.id ? { ...s, plays: s.plays + 1 } : s
@@ -223,89 +221,103 @@ export default function InstantSounds() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Navbar */}
-      <nav className="border-b border-zinc-800 bg-[#0a0a0a]">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      {/* Navbar - Mobile Optimized */}
+      <nav className="border-b border-zinc-800 bg-[#0a0a0a] sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
                 <span className="font-bold text-black text-lg">IS</span>
               </div>
               <div>
-                <span className="font-bold text-xl">InstantSounds</span>
-                <span className="ml-1 text-xs text-zinc-500">instant.blazenxt.in</span>
+                <span className="font-bold text-lg">InstantSounds</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-sm">
-            <button onClick={toggleAutoPlay} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${isAutoPlaying ? 'bg-green-600 text-white' : 'hover:bg-zinc-900'}`} title="Auto Play">
-              {isAutoPlaying ? <Pause size={16} /> : <Play size={16} />} Auto
+          {/* Mobile-friendly navbar buttons */}
+          <div className="flex items-center gap-1 text-sm">
+            <button 
+              onClick={toggleAutoPlay} 
+              className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-colors ${isAutoPlaying ? 'bg-green-600 text-white' : 'hover:bg-zinc-900'}`}
+            >
+              {isAutoPlaying ? <Pause size={15} /> : <Play size={15} />}
+              <span className="hidden sm:inline">Auto</span>
             </button>
-            <button onClick={playRandomSound} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg" title="Random (R)">
-              <Shuffle size={16} /> Random
+            
+            <button onClick={playRandomSound} className="flex items-center gap-1 px-2 py-1.5 hover:bg-zinc-900 rounded-lg">
+              <Shuffle size={15} />
+              <span className="hidden sm:inline">Random</span>
             </button>
-            <button onClick={() => setShowRecentModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg">
-              <Clock size={16} /> Recent
+            
+            <button onClick={() => setShowRecentModal(true)} className="flex items-center gap-1 px-2 py-1.5 hover:bg-zinc-900 rounded-lg">
+              <Clock size={15} />
             </button>
-            <button onClick={() => setShowFavoritesModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg">
-              <Heart size={16} /> Favorites
+            
+            <button onClick={() => setShowFavoritesModal(true)} className="flex items-center gap-1 px-2 py-1.5 hover:bg-zinc-900 rounded-lg">
+              <Heart size={15} />
+              <span className="hidden sm:inline">Fav</span>
             </button>
-            <button onClick={() => setShowUploadModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg">
-              <Upload size={16} /> Upload
+            
+            <button onClick={() => setShowUploadModal(true)} className="flex items-center gap-1 px-2 py-1.5 hover:bg-zinc-900 rounded-lg">
+              <Upload size={15} />
             </button>
-            <button onClick={() => toast.info("Login coming soon")} className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-black rounded-lg text-sm font-medium">
-              <User size={16} /> Login
+            
+            <button onClick={() => toast.info("Login coming soon")} className="flex items-center gap-1 px-3 py-1.5 bg-white text-black rounded-lg text-sm font-medium">
+              <User size={15} />
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <div className="max-w-3xl mx-auto px-4 pt-10 pb-8 text-center">
+      {/* Hero - Mobile friendly */}
+      <div className="max-w-3xl mx-auto px-4 pt-8 pb-6 text-center">
         <div className="inline px-3 py-1 text-xs bg-zinc-900 rounded-full mb-4">🔥 Trending worldwide</div>
         
-        <h1 className="text-5xl font-bold tracking-tighter mb-3">
-          The largest instant sound buttons website
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tighter mb-3 leading-tight">
+          The largest instant<br />sound buttons website
         </h1>
-        <p className="text-zinc-400 text-lg">Click to play. No download. No signup needed.</p>
+        <p className="text-zinc-400 text-base">Click to play. No download. No signup needed.</p>
 
-        <div className="mt-6 flex items-center justify-center gap-3 text-sm">
-          <Volume2 size={18} className="text-zinc-400" />
-          <input type="range" min="0.1" max="1" step="0.05" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="w-40 accent-green-500" />
+        {/* Volume */}
+        <div className="mt-5 flex items-center justify-center gap-3 text-sm">
+          <Volume2 size={17} className="text-zinc-400" />
+          <input type="range" min="0.1" max="1" step="0.05" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="w-36 accent-green-500" />
           <span className="text-xs text-zinc-500 w-8">{Math.round(volume * 100)}%</span>
         </div>
 
-        <div className="mt-4 max-w-md mx-auto relative">
-          <Search className="absolute left-4 top-3.5 text-zinc-500" size={18} />
-          <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search sounds..." className="w-full bg-zinc-900 border border-zinc-800 pl-11 py-3 rounded-xl text-sm focus:outline-none focus:border-green-500" />
+        <div className="mt-4 max-w-xs mx-auto relative">
+          <Search className="absolute left-4 top-3 text-zinc-500" size={17} />
+          <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search sounds..." className="w-full bg-zinc-900 border border-zinc-800 pl-10 py-2.5 rounded-xl text-sm focus:outline-none focus:border-green-500" />
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filters - Mobile friendly */}
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col gap-4 border-b border-zinc-800 pb-4 mb-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Country Tabs */}
+            <div className="flex gap-1 bg-zinc-900 p-0.5 rounded-xl overflow-x-auto">
               {(["All", "US", "IN"] as const).map(c => (
-                <button key={c} onClick={() => setActiveCountry(c)} className={`px-5 py-1.5 text-sm rounded-lg transition-all ${activeCountry === c ? 'bg-white text-black' : 'hover:bg-zinc-800'}`}>
+                <button key={c} onClick={() => setActiveCountry(c)} className={`px-4 py-1.5 text-sm rounded-lg transition-all whitespace-nowrap ${activeCountry === c ? 'bg-white text-black' : 'hover:bg-zinc-800'}`}>
                   {c === "All" ? "All" : c}
                 </button>
               ))}
             </div>
 
-            <div className="flex items-center gap-4">
-              <select value={sortBy} onChange={e => setSortBy(e.target.value as SortOption)} className="bg-zinc-900 border border-zinc-800 px-4 py-2 text-sm rounded-xl">
-                <option value="popular">Most Popular</option>
+            <div className="flex items-center gap-3">
+              <select value={sortBy} onChange={e => setSortBy(e.target.value as SortOption)} className="bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-sm rounded-xl">
+                <option value="popular">Popular</option>
                 <option value="newest">Newest</option>
               </select>
-              <div className="text-sm text-zinc-400">{filteredSounds.length} sounds</div>
+              <div className="text-xs text-zinc-400 hidden sm:block">{filteredSounds.length} sounds</div>
             </div>
           </div>
 
-          <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl w-fit">
+          {/* Category Tabs */}
+          <div className="flex gap-1 bg-zinc-900 p-0.5 rounded-xl overflow-x-auto w-fit">
             {(["All", "Memes", "Funny", "Gaming"] as const).map(cat => (
-              <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-5 py-1.5 text-sm rounded-lg transition-all ${activeCategory === cat ? 'bg-white text-black font-medium' : 'hover:bg-zinc-800 text-zinc-300'}`}>
+              <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-1.5 text-sm rounded-lg transition-all whitespace-nowrap ${activeCategory === cat ? 'bg-white text-black font-medium' : 'hover:bg-zinc-800 text-zinc-300'}`}>
                 {cat}
               </button>
             ))}
@@ -314,61 +326,60 @@ export default function InstantSounds() {
       </div>
 
       {/* Trending Bar */}
-      <div className="max-w-7xl mx-auto px-4 mb-6">
-        <div className="flex items-center gap-2 mb-3 text-sm text-zinc-400">
-          <TrendingUp size={16} /> Trending
+      <div className="max-w-7xl mx-auto px-4 mb-5">
+        <div className="flex items-center gap-2 mb-2 text-xs text-zinc-400">
+          <TrendingUp size={15} /> Trending
         </div>
         <div className="flex gap-2 overflow-x-auto pb-2">
           {sounds.slice(0, 6).map(sound => (
-            <button key={sound.id} onClick={() => playSound(sound)} className="text-sm whitespace-nowrap px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg">
-              {sound.name}
+            <button key={sound.id} onClick={() => playSound(sound)} className="text-xs whitespace-nowrap px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg">
+              {sound.name.length > 18 ? sound.name.substring(0, 18) + "..." : sound.name}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Sound Grid */}
-      <div className="max-w-7xl mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      {/* Sound Grid - Mobile Optimized */}
+      <div className="max-w-7xl mx-auto px-3 pb-16">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
           {filteredSounds.map(sound => {
             const isFav = favorites.includes(sound.id);
             const isPlaying = playingId === sound.id;
 
             return (
-              <div key={sound.id} className="border border-zinc-800 bg-zinc-900 rounded-xl p-4 flex flex-col">
-                <button onClick={() => playSound(sound)} className="flex-1 flex items-center gap-3 bg-zinc-950 hover:bg-zinc-800 active:bg-zinc-700 border border-zinc-800 px-4 py-4 rounded-lg text-left transition-colors">
-                  <div className="w-9 h-9 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0">
-                    <Play size={18} className="text-black" fill="currentColor" />
+              <div key={sound.id} className="sound-card border border-zinc-800 bg-zinc-900 rounded-2xl p-3 flex flex-col">
+                <button onClick={() => playSound(sound)} className="flex-1 flex items-center gap-2.5 bg-zinc-950 active:bg-zinc-700 border border-zinc-800 px-3 py-3.5 rounded-xl text-left transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0">
+                    <Play size={16} className="text-black" fill="currentColor" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-sm leading-tight truncate">{sound.name}</div>
-                    <div className="text-xs text-zinc-500 mt-0.5">{sound.category} • {sound.country}</div>
+                    <div className="font-semibold text-sm leading-tight line-clamp-2">{sound.name}</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">{sound.category} • {sound.country}</div>
                   </div>
                 </button>
 
-                <div className="flex items-center justify-between mt-3 px-1">
-                  <div className="flex gap-1">
+                <div className="flex items-center justify-between mt-2 px-1">
+                  <div className="flex gap-0.5">
                     <button onClick={() => toggleFavorite(sound.id)} className={`p-1.5 rounded-lg hover:bg-zinc-800 ${isFav ? 'text-red-500' : 'text-zinc-400'}`}>
-                      <Heart size={16} fill={isFav ? "currentColor" : "none"} />
+                      <Heart size={15} fill={isFav ? "currentColor" : "none"} />
                     </button>
                     <button onClick={() => copyLink(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 rounded-lg">
-                      <LinkIcon size={16} />
+                      <LinkIcon size={15} />
                     </button>
                     <button onClick={() => shareSound(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 rounded-lg">
-                      <Share2 size={16} />
+                      <Share2 size={15} />
                     </button>
-                    <button onClick={() => downloadSound(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-green-400 rounded-lg" title="Download">
-                      <Download size={16} />
+                    <button onClick={() => downloadSound(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-green-400 rounded-lg">
+                      <Download size={15} />
                     </button>
                   </div>
                   
-                  <a href={`/instant/${sound.slug}`} className="text-xs text-zinc-400 hover:text-white px-2 py-0.5">
+                  <a href={`/instant/${sound.slug}`} className="text-[10px] text-zinc-400 hover:text-white px-1.5 py-0.5">
                     View
                   </a>
                 </div>
 
-                {/* Play count display */}
-                <div className="text-[10px] text-zinc-500 text-right mt-1 pr-1">
+                <div className="text-[9px] text-zinc-500 text-right mt-0.5 pr-1">
                   {sound.plays.toLocaleString()} plays
                 </div>
               </div>
@@ -382,14 +393,14 @@ export default function InstantSounds() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-800 py-6 text-center text-xs text-zinc-500">
-        Built on instant.blazenxt.in • Myinstants clone • Press R for random
+      <footer className="border-t border-zinc-800 py-5 text-center text-xs text-zinc-500">
+        Built on instant.blazenxt.in • Myinstants clone
       </footer>
 
       {/* Modals */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4">
-          <div className="bg-zinc-900 border border-zinc-700 w-full max-w-md rounded-2xl p-6">
+          <div className="bg-zinc-900 border border-zinc-700 w-full max-w-md rounded-2xl p-6 modal">
             <div className="flex justify-between mb-5">
               <h3 className="font-semibold text-xl">Upload Sound</h3>
               <button onClick={() => setShowUploadModal(false)}><X /></button>
@@ -413,7 +424,7 @@ export default function InstantSounds() {
 
       {showFavoritesModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4">
-          <div className="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-2xl overflow-hidden">
+          <div className="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-2xl overflow-hidden modal">
             <div className="p-5 border-b border-zinc-700 flex justify-between">
               <div className="font-semibold">Favorites ({favorites.length})</div>
               <button onClick={() => setShowFavoritesModal(false)}><X /></button>
@@ -421,8 +432,8 @@ export default function InstantSounds() {
             <div className="max-h-[60vh] overflow-auto p-4">
               {favoriteSounds.length > 0 ? favoriteSounds.map(s => (
                 <div key={s.id} className="flex justify-between items-center py-3 border-b border-zinc-800 last:border-none">
-                  <div>{s.name}</div>
-                  <div className="flex gap-3">
+                  <div className="text-sm pr-2">{s.name}</div>
+                  <div className="flex gap-3 flex-shrink-0">
                     <button onClick={() => playSound(s)} className="text-green-400"><Play size={16} /></button>
                     <button onClick={() => toggleFavorite(s.id)} className="text-red-400 text-sm">Remove</button>
                   </div>
@@ -435,7 +446,7 @@ export default function InstantSounds() {
 
       {showRecentModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4">
-          <div className="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-2xl overflow-hidden">
+          <div className="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-2xl overflow-hidden modal">
             <div className="p-5 border-b border-zinc-700 flex justify-between">
               <div className="font-semibold">Recently Played</div>
               <button onClick={() => setShowRecentModal(false)}><X /></button>

@@ -9,53 +9,66 @@ body {
   font-family: var(--font-geist-sans);
 }
 
-/* MyInstants Classic Style */
-.sound-button {
-  transition: all 0.05s linear;
-  border: 1px solid #27272a;
-  background: #18181b;
-}
+/* Mobile-first responsive styles */
 
-.sound-button:hover {
-  background: #27272a;
-  border-color: #3f3f46;
-}
-
-.sound-button:active {
-  background: #3f3f46;
-  transform: scale(0.995);
-}
-
-.icon-btn {
-  transition: color 0.1s ease;
-}
-
-.icon-btn:hover {
-  color: #22c55e;
-}
-
-/* Classic Myinstants grid */
-.sound-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px;
-}
-
-/* Navbar */
-.nav-link {
+/* Sound Card */
+.sound-card {
   transition: all 0.1s ease;
 }
 
-.nav-link:hover {
-  color: #22c55e;
+.sound-card:active {
+  transform: scale(0.985);
 }
 
-/* Search */
-.search-input {
-  transition: border-color 0.2s ease;
+/* Better mobile grid */
+.sound-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
 }
 
-.search-input:focus {
-  border-color: #22c55e;
-  outline: none;
+/* Desktop grid */
+@media (min-width: 640px) {
+  .sound-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sound-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+}
+
+/* Navbar mobile optimization */
+@media (max-width: 640px) {
+  .nav-button {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .nav-button span {
+    display: none;
+  }
+  
+  .nav-button svg {
+    margin-right: 0;
+  }
+}
+
+/* Modal mobile friendly */
+@media (max-width: 640px) {
+  .modal {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+}
+
+/* Touch friendly buttons */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
 }
