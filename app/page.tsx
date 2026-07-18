@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User } from 'lucide-react';
+import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Enhanced sounds data (30+ sounds)
@@ -54,11 +54,18 @@ interface Sound {
 type CountryFilter = "All" | "US" | "IN";
 
 export default function InstantSounds() {
-  const [sounds] = useState<Sound[]>(allSounds);
+  const [sounds, setSounds] = useState<Sound[]>(allSounds);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCountry, setActiveCountry] = useState<CountryFilter>("All");
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<number[]>([]);
+  
+  // Modal states
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showFavoritesModal, setShowFavoritesModal] = useState(false);
+  const [uploadName, setUploadName] = useState("");
+  const [uploadCategory, setUploadCategory] = useState("Memes");
+  const [uploadCountry, setUploadCountry] = useState<"US" | "IN">("IN");
 
   // Filter sounds
   const filteredSounds = sounds.filter(sound => {
@@ -71,11 +78,13 @@ export default function InstantSounds() {
     return matchesSearch && matchesCountry;
   });
 
-  // Play sound with improved simulation
+  // Get favorite sounds
+  const favoriteSounds = sounds.filter(sound => favorites.includes(sound.id));
+
+  // Play sound
   const playSound = (sound: Sound) => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     
-    // Create a more realistic meme sound using multiple oscillators
     const oscillator1 = audioContext.createOscillator();
     const oscillator2 = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -84,7 +93,6 @@ export default function InstantSounds() {
     oscillator1.type = 'sawtooth';
     oscillator2.type = 'square';
     
-    // Different frequencies based on sound ID for variety
     const baseFreq = 180 + (sound.id % 12) * 35;
     oscillator1.frequency.value = baseFreq;
     oscillator2.frequency.value = baseFreq * 1.5;
@@ -94,8 +102,6 @@ export default function InstantSounds() {
 
     gainNode.gain.value = 0.25;
 
-    // Connect nodes
-    const merger = audioContext.createChannelMerger(2);
     oscillator1.connect(filter);
     oscillator2.connect(filter);
     filter.connect(gainNode);
@@ -106,7 +112,6 @@ export default function InstantSounds() {
 
     setPlayingId(sound.id);
 
-    // Stop after realistic duration (0.8s - 1.6s)
     const duration = 800 + (sound.id % 5) * 160;
     
     setTimeout(() => {
@@ -149,12 +154,39 @@ export default function InstantSounds() {
           text: `Check out this sound: ${sound.name}`,
           url: url,
         });
-      } catch (error) {
-        // User cancelled
-      }
+      } catch (error) {}
     } else {
       copyLink(sound);
     }
+  };
+
+  // Handle Upload
+  const handleUpload = () => {
+    if (!uploadName.trim()) {
+      toast.error("Please enter a sound name");
+      return;
+    }
+
+    const newSound: Sound = {
+      id: Date.now(),
+      name: uploadName.trim(),
+      slug: uploadName.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now(),
+      category: uploadCategory,
+      country: uploadCountry,
+    };
+
+    setSounds([newSound, ...sounds]);
+    
+    toast.success(`Sound uploaded: ${uploadName}`);
+    
+    // Reset form
+    setUploadName("");
+    setShowUploadModal(false);
+    
+    // Auto play the new sound
+    setTimeout(() => {
+      playSound(newSound);
+    }, 600);
   };
 
   return (
@@ -172,13 +204,20 @@ export default function InstantSounds() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <a 
-              href="#upload" 
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setShowFavoritesModal(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-zinc-900 hover:bg-zinc-800 rounded-xl border border-zinc-800 transition-colors"
+            >
+              <Heart size={16} /> Favorites ({favorites.length})
+            </button>
+            
+            <button 
+              onClick={() => setShowUploadModal(true)}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-zinc-900 hover:bg-zinc-800 rounded-xl border border-zinc-800 transition-colors"
             >
               <Upload size={16} /> Upload
-            </a>
+            </button>
             
             <button 
               onClick={() => toast.info("Login feature coming soon!")}
@@ -340,6 +379,125 @@ export default function InstantSounds() {
           <p className="mt-1">Instant playback • No signup required • Made for meme lovers</p>
         </div>
       </footer>
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-semibold">Upload New Sound</h3>
+              <button onClick={() => setShowUploadModal(false)} className="text-zinc-400 hover:text-white">
+                <X size={22} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-zinc-400 mb-1.5">Sound Name</label>
+                <input
+                  type="text"
+                  value={uploadName}
+                  onChange={(e) => setUploadName(e.target.value)}
+                  placeholder="e.g. My Epic Fart"
+                  className="w-full px-4 py-3 bg-zinc-950 border border-zinc-700 rounded-2xl focus:outline-none focus:border-green-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-zinc-400 mb-1.5">Category</label>
+                  <select 
+                    value={uploadCategory}
+                    onChange={(e) => setUploadCategory(e.target.value)}
+                    className="w-full px-4 py-3 bg-zinc-950 border border-zinc-700 rounded-2xl focus:outline-none"
+                  >
+                    <option>Memes</option>
+                    <option>Funny</option>
+                    <option>Gaming</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-zinc-400 mb-1.5">Country</label>
+                  <select 
+                    value={uploadCountry}
+                    onChange={(e) => setUploadCountry(e.target.value as "US" | "IN")}
+                    className="w-full px-4 py-3 bg-zinc-950 border border-zinc-700 rounded-2xl focus:outline-none"
+                  >
+                    <option value="IN">India</option>
+                    <option value="US">United States</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button 
+                onClick={() => setShowUploadModal(false)}
+                className="flex-1 py-3 border border-zinc-700 hover:bg-zinc-800 rounded-2xl font-medium"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleUpload}
+                className="flex-1 py-3 bg-green-500 text-black font-semibold rounded-2xl hover:bg-green-600 transition-colors"
+              >
+                Upload Sound
+              </button>
+            </div>
+            
+            <p className="text-xs text-center text-zinc-500 mt-4">
+              MP3 files up to 2MB supported (demo)
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Favorites Modal */}
+      {showFavoritesModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b border-zinc-700">
+              <h3 className="text-2xl font-semibold">Your Favorites ({favorites.length})</h3>
+              <button onClick={() => setShowFavoritesModal(false)} className="text-zinc-400 hover:text-white">
+                <X size={22} />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-auto max-h-[60vh]">
+              {favoriteSounds.length > 0 ? (
+                <div className="grid gap-4">
+                  {favoriteSounds.map((sound) => (
+                    <div key={sound.id} className="flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded-2xl p-4">
+                      <div>
+                        <div className="font-semibold">{sound.name}</div>
+                        <div className="text-xs text-zinc-500">{sound.category} • {sound.country}</div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => playSound(sound)} 
+                          className="px-4 py-2 bg-green-500 text-black rounded-xl text-sm font-medium flex items-center gap-2"
+                        >
+                          <Play size={16} /> Play
+                        </button>
+                        <button 
+                          onClick={() => toggleFavorite(sound.id)} 
+                          className="px-4 py-2 border border-zinc-700 rounded-xl text-sm text-red-400"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-zinc-400">
+                  No favorites yet.<br />Heart some sounds to save them here.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
