@@ -64,6 +64,29 @@ Your site will be live instantly.
 
 ---
 
+## Deploy to Railway (Alternative)
+
+Railway is great for running background tasks (like the scraper).
+
+### Steps:
+
+1. Go to [railway.app](https://railway.app) and sign in with GitHub
+2. Click **New Project** → **Deploy from GitHub repo**
+3. Select `blazenxt/InstantSounds`
+4. Railway will auto-detect Next.js
+5. Click **Deploy**
+
+### Optional: Add Environment Variables (if using Supabase later)
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+Your project will be live at a Railway domain (e.g. `instantsounds-production.up.railway.app`).
+
+**Pro Tip**: Railway is excellent if you want to run the scraper in the background.
+
+---
+
 ## Project Structure
 
 ```
