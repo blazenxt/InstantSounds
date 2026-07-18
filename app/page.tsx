@@ -22,6 +22,7 @@ export default function InstantSounds() {
   const [sounds, setSounds] = useState<Sound[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [activeCountry, setActiveCountry] = useState<CountryFilter>("All");
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("All");
   const [sortBy, setSortBy] = useState<SortOption>("popular");
@@ -39,6 +40,14 @@ export default function InstantSounds() {
   const [uploadName, setUploadName] = useState("");
   const [uploadCategory, setUploadCategory] = useState("Memes");
   const [uploadCountry, setUploadCountry] = useState<"US" | "IN">("IN");
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // Load sounds
   useEffect(() => {
@@ -70,14 +79,14 @@ export default function InstantSounds() {
   const filteredSounds = useMemo(() => {
     return sounds
       .filter(sound => {
-        const matchesSearch = sound.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                              sound.category.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = sound.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
+                              sound.category.toLowerCase().includes(debouncedSearch.toLowerCase());
         const matchesCountry = activeCountry === "All" || sound.country === activeCountry;
         const matchesCategory = activeCategory === "All" || sound.category === activeCategory;
         return matchesSearch && matchesCountry && matchesCategory;
       })
       .sort((a, b) => sortBy === "popular" ? b.plays - a.plays : b.id - a.id);
-  }, [sounds, searchTerm, activeCountry, activeCategory, sortBy]);
+  }, [sounds, debouncedSearch, activeCountry, activeCategory, sortBy]);
 
   const favoriteSounds = sounds.filter(s => favorites.includes(s.id));
 
@@ -214,8 +223,38 @@ export default function InstantSounds() {
     setTimeout(() => playSound(newSound), 500);
   };
 
+  // Skeleton Loading
   if (loading) {
-    return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white">Loading sounds...</div>;
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] text-white">
+        <nav className="border-b border-zinc-800 bg-[#0a0a0a]">
+          <div className="max-w-7xl mx-auto px-3 h-14 flex items-center">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 bg-zinc-800 rounded-xl animate-pulse" />
+              <div className="w-32 h-6 bg-zinc-800 rounded animate-pulse" />
+            </div>
+          </div>
+        </nav>
+        
+        <div className="max-w-7xl mx-auto px-3 pt-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="border border-zinc-800 bg-zinc-900 rounded-2xl p-3">
+                <div className="h-20 bg-zinc-800 rounded-xl animate-pulse" />
+                <div className="flex justify-between mt-3">
+                  <div className="flex gap-1">
+                    {Array.from({ length: 4 }).map((_, j) => (
+                      <div key={j} className="w-8 h-8 bg-zinc-800 rounded-lg animate-pulse" />
+                    ))}
+                  </div>
+                  <div className="w-10 h-4 bg-zinc-800 rounded animate-pulse" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -280,7 +319,13 @@ export default function InstantSounds() {
 
         <div className="mt-4 max-w-xs mx-auto relative">
           <Search className="absolute left-4 top-3 text-zinc-500" size={17} />
-          <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search sounds..." className="w-full bg-zinc-900 border border-zinc-800 pl-10 py-2.5 rounded-xl text-sm focus:outline-none focus:border-green-500" />
+          <input 
+            type="text" 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+            placeholder="Search sounds..." 
+            className="w-full bg-zinc-900 border border-zinc-800 pl-10 py-2.5 rounded-xl text-sm focus:outline-none focus:border-green-500" 
+          />
         </div>
       </div>
 
@@ -342,39 +387,52 @@ export default function InstantSounds() {
                   key={sound.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.02 }}
-                  className="sound-card border border-zinc-800 bg-zinc-900 rounded-2xl p-3 flex flex-col"
+                  transition={{ delay: Math.min(index * 0.015, 0.3) }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.985 }}
+                  className={`sound-card border border-zinc-800 bg-zinc-900 rounded-2xl p-3 flex flex-col transition-all ${isPlaying ? 'ring-1 ring-green-500/50' : ''}`}
                 >
                   <button 
                     onClick={() => playSound(sound)} 
-                    className="flex-1 flex items-center gap-2.5 bg-zinc-950 active:bg-zinc-700 border border-zinc-800 px-3 py-3.5 rounded-xl text-left transition-colors"
+                    className="flex-1 flex items-center gap-2.5 bg-zinc-950 active:bg-zinc-700 border border-zinc-800 px-3 py-3.5 rounded-xl text-left transition-colors relative overflow-hidden"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0">
+                    <div className={`w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0 transition-all ${isPlaying ? 'scale-110' : ''}`}>
                       <Play size={16} className="text-black" fill="currentColor" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-semibold text-sm leading-tight line-clamp-2">{sound.name}</div>
                       <div className="text-[10px] text-zinc-500 mt-0.5">{sound.category} • {sound.country}</div>
                     </div>
+                    
+                    {/* Playing indicator */}
+                    {isPlaying && (
+                      <div className="absolute right-2 top-2">
+                        <div className="flex gap-0.5">
+                          <div className="w-1 h-3 bg-green-400 animate-pulse rounded" />
+                          <div className="w-1 h-3 bg-green-400 animate-pulse rounded delay-75" />
+                          <div className="w-1 h-3 bg-green-400 animate-pulse rounded delay-150" />
+                        </div>
+                      </div>
+                    )}
                   </button>
 
                   <div className="flex items-center justify-between mt-2 px-1">
                     <div className="flex gap-0.5">
-                      <button onClick={() => toggleFavorite(sound.id)} className={`p-1.5 rounded-lg hover:bg-zinc-800 ${isFav ? 'text-red-500' : 'text-zinc-400'}`}>
+                      <button onClick={() => toggleFavorite(sound.id)} className={`p-1.5 rounded-lg hover:bg-zinc-800 transition-colors ${isFav ? 'text-red-500' : 'text-zinc-400'}`}>
                         <Heart size={15} fill={isFav ? "currentColor" : "none"} />
                       </button>
-                      <button onClick={() => copyLink(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 rounded-lg">
+                      <button onClick={() => copyLink(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 rounded-lg transition-colors">
                         <LinkIcon size={15} />
                       </button>
-                      <button onClick={() => shareSound(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 rounded-lg">
+                      <button onClick={() => shareSound(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 rounded-lg transition-colors">
                         <Share2 size={15} />
                       </button>
-                      <button onClick={() => downloadSound(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-green-400 rounded-lg">
+                      <button onClick={() => downloadSound(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-green-400 rounded-lg transition-colors">
                         <Download size={15} />
                       </button>
                     </div>
                     
-                    <a href={`/instant/${sound.slug}`} className="text-[10px] text-zinc-400 hover:text-white px-1.5 py-0.5">
+                    <a href={`/instant/${sound.slug}`} className="text-[10px] text-zinc-400 hover:text-white px-1.5 py-0.5 transition-colors">
                       View
                     </a>
                   </div>
@@ -389,7 +447,7 @@ export default function InstantSounds() {
         </div>
 
         {filteredSounds.length === 0 && (
-          <div className="text-center py-12 text-zinc-400">No results found.</div>
+          <div className="text-center py-12 text-zinc-400">No results found for "{debouncedSearch}"</div>
         )}
       </div>
 
@@ -398,7 +456,7 @@ export default function InstantSounds() {
         Built on instant.blazenxt.in • Myinstants clone
       </footer>
 
-      {/* Modals with Animation */}
+      {/* Upload Modal with Animation */}
       <AnimatePresence>
         {showUploadModal && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4">
@@ -430,7 +488,62 @@ export default function InstantSounds() {
         )}
       </AnimatePresence>
 
-      {/* Other modals can also have animations if needed */}
+      {/* Favorites Modal */}
+      <AnimatePresence>
+        {showFavoritesModal && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-2xl overflow-hidden modal"
+            >
+              <div className="p-5 border-b border-zinc-700 flex justify-between">
+                <div className="font-semibold">Favorites ({favorites.length})</div>
+                <button onClick={() => setShowFavoritesModal(false)}><X /></button>
+              </div>
+              <div className="max-h-[60vh] overflow-auto p-4">
+                {favoriteSounds.length > 0 ? favoriteSounds.map(s => (
+                  <div key={s.id} className="flex justify-between items-center py-3 border-b border-zinc-800 last:border-none">
+                    <div className="pr-2 text-sm">{s.name}</div>
+                    <div className="flex gap-3 flex-shrink-0">
+                      <button onClick={() => playSound(s)} className="text-green-400"><Play size={16} /></button>
+                      <button onClick={() => toggleFavorite(s.id)} className="text-red-400 text-sm">Remove</button>
+                    </div>
+                  </div>
+                )) : <div className="py-8 text-center text-zinc-400">No favorites yet</div>}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Recent Modal */}
+      <AnimatePresence>
+        {showRecentModal && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-2xl overflow-hidden modal"
+            >
+              <div className="p-5 border-b border-zinc-700 flex justify-between">
+                <div className="font-semibold">Recently Played</div>
+                <button onClick={() => setShowRecentModal(false)}><X /></button>
+              </div>
+              <div className="max-h-[60vh] overflow-auto p-4">
+                {recentPlays.length > 0 ? recentPlays.map(s => (
+                  <div key={s.id} className="flex justify-between items-center py-3 border-b border-zinc-800 last:border-none">
+                    <div>{s.name}</div>
+                    <button onClick={() => playSound(s)} className="text-green-400"><Play size={16} /></button>
+                  </div>
+                )) : <div className="py-8 text-center text-zinc-400">No recent plays yet</div>}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
