@@ -361,9 +361,13 @@ export default function InstantSounds() {
 
                     <div className="flex-1" />
 
-                    <div className="px-3 py-1 text-[10px] font-mono bg-zinc-950 border border-zinc-800 text-zinc-500 rounded-full">
-                      {sound.slug.split('-')[0]}
-                    </div>
+                    <a 
+                      href={`/instant/${sound.slug}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="px-3 py-1 text-[10px] font-mono bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600 rounded-full transition-colors"
+                    >
+                      View
+                    </a>
                   </div>
                 </div>
               );
