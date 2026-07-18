@@ -1,57 +1,86 @@
 # InstantSounds
 
-**instant.blazenxt.in** — The largest instant sound buttons website.
+**Live Demo:** [instant.blazenxt.in](https://instant.blazenxt.in)  
+**GitHub:** https://github.com/blazenxt/InstantSounds
 
-A fully functional clone of Myinstants.com built with Next.js.
+A beautiful, fully functional clone of **Myinstants.com** — the largest instant sound buttons website.
 
-## Current Status
+Built with Next.js 16 + TypeScript + Tailwind.
 
-✅ **Phase 0 & 1 Complete**  
-- Project initialized  
-- Beautiful dark-themed UI matching Myinstants style  
-- Fully functional sound grid with playable buttons  
-- Search functionality  
-- Favorite, Copy Link, and Share actions  
-- Toast notifications  
-- Responsive design
+---
 
-## Live Demo
+## Features
 
-Open `http://localhost:3000` after running the dev server.
+- ✅ **Instant sound playback** (30+ meme sounds)
+- ✅ **Country filters** (All / US / India)
+- ✅ **Trending section**
+- ✅ **Search + Sort** (Most Popular / Newest)
+- ✅ **Upload modal** (add your own sounds)
+- ✅ **Favorites modal**
+- ✅ **Sound detail pages** (`/instant/[slug]`)
+- ✅ **Share / Copy link** functionality
+- ✅ **Fully responsive** (mobile friendly)
+- ✅ **Production ready** for Vercel
 
-## Features Implemented
-
-- Instant sound playback (simulated with Web Audio API)
-- Real-time search
-- Add/remove favorites
-- Copy shareable links
-- Social share
-- Beautiful modern UI
-
-## Next Steps (Planned)
-
-- Real audio files (Supabase Storage)
-- User authentication
-- Upload functionality
-- Actual database integration
-- Sound detail pages
+---
 
 ## Tech Stack
 
-- Next.js 15
-- TypeScript
-- Tailwind CSS
-- Lucide Icons
-- Sonner (toasts)
+- **Next.js 16** (App Router)
+- **TypeScript**
+- **Tailwind CSS**
+- **Lucide Icons**
+- **Sonner** (toast notifications)
+
+---
 
 ## Run Locally
 
 ```bash
+git clone https://github.com/blazenxt/InstantSounds.git
+cd InstantSounds
+npm install
 npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+---
+
+## Deploy to Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Go to [vercel.com](https://vercel.com)
+3. Click **New Project**
+4. Import `blazenxt/InstantSounds`
+5. Vercel will automatically detect Next.js
+6. Click **Deploy**
+
+Your site will be live instantly.
+
+**Custom Domain:** Connect `instant.blazenxt.in`
+
+---
+
+## Project Structure
+
+```
+app/
+├── instant/[slug]/page.tsx   # Sound detail page
+├── layout.tsx
+├── page.tsx                  # Homepage
+├── globals.css
+vercel.json
 ```
 
 ---
 
-**Project Name:** InstantSounds  
-**Subdomain:** instant.blazenxt.in  
-**Tagline:** The largest instant sound buttons website
+## Status
+
+- ✅ Fully working demo
+- ✅ Production build successful
+- ✅ Ready for Vercel deployment
+
+---
+
+**Built by BlazeNXT** • Clone of Myinstants.com
