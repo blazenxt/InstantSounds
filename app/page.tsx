@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User, X, TrendingUp, Shuffle, Volume2, Clock } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User, X, TrendingUp, Shuffle, Volume2, Clock, Pause } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Sound {
@@ -28,6 +28,10 @@ export default function InstantSounds() {
   const [favorites, setFavorites] = useState<number[]>([]);
   const [recentPlays, setRecentPlays] = useState<Sound[]>([]);
   const [volume, setVolume] = useState(0.6);
+  
+  // Auto-play state
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const autoPlayIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
@@ -63,7 +67,27 @@ export default function InstantSounds() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [sounds]);
 
-  // Filtered sounds with category support
+  // Auto-play logic
+  useEffect(() => {
+    if (isAutoPlaying) {
+      autoPlayIntervalRef.current = setInterval(() => {
+        if (filteredSounds.length > 0) {
+          const randomIndex = Math.floor(Math.random() * filteredSounds.length);
+          playSound(filteredSounds[randomIndex]);
+        }
+      }, 2200); // Play a new sound every 2.2 seconds
+    } else {
+      if (autoPlayIntervalRef.current) {
+        clearInterval(autoPlayIntervalRef.current);
+        autoPlayIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (autoPlayIntervalRef.current) clearInterval(autoPlayIntervalRef.current);
+    };
+  }, [isAutoPlaying, filteredSounds]);
+
   const filteredSounds = sounds
     .filter(sound => {
       const matchesSearch = sound.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -120,6 +144,15 @@ export default function InstantSounds() {
     if (filteredSounds.length === 0) return;
     const randomIndex = Math.floor(Math.random() * filteredSounds.length);
     playSound(filteredSounds[randomIndex]);
+  };
+
+  const toggleAutoPlay = () => {
+    setIsAutoPlaying(!isAutoPlaying);
+    if (!isAutoPlaying) {
+      toast.success("Auto-play started 🎵");
+    } else {
+      toast.info("Auto-play stopped");
+    }
   };
 
   const toggleFavorite = (id: number) => {
@@ -184,6 +217,13 @@ export default function InstantSounds() {
           </div>
 
           <div className="flex items-center gap-2 text-sm">
+            <button 
+              onClick={toggleAutoPlay} 
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${isAutoPlaying ? 'bg-green-600 text-white' : 'hover:bg-zinc-900'}`}
+              title="Auto Play"
+            >
+              {isAutoPlaying ? <Pause size={16} /> : <Play size={16} />} Auto
+            </button>
             <button onClick={playRandomSound} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg" title="Random (R)">
               <Shuffle size={16} /> Random
             </button>
@@ -228,7 +268,6 @@ export default function InstantSounds() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col gap-4 border-b border-zinc-800 pb-4 mb-6">
           
-          {/* Country + Sort */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl">
               {(["All", "US", "IN"] as const).map(c => (
@@ -247,7 +286,7 @@ export default function InstantSounds() {
             </div>
           </div>
 
-          {/* Category Tabs (NEW) */}
+          {/* Category Tabs */}
           <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl w-fit">
             {(["All", "Memes", "Funny", "Gaming"] as const).map(cat => (
               <button
@@ -328,7 +367,7 @@ export default function InstantSounds() {
         Built on instant.blazenxt.in • Myinstants clone • Press R for random
       </footer>
 
-      {/* Modals (same as before) */}
+      {/* Modals */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4">
           <div className="bg-zinc-900 border border-zinc-700 w-full max-w-md rounded-2xl p-6">
