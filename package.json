@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p ${PORT:-3000}",
     "lint": "eslint",
     "scrape": "npx tsx scripts/scraper.ts",
     "scrape:watch": "npx tsx scripts/auto-scraper.ts"
