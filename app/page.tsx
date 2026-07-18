@@ -14,6 +14,7 @@ interface Sound {
 }
 
 type CountryFilter = "All" | "US" | "IN";
+type CategoryFilter = "All" | "Memes" | "Funny" | "Gaming";
 type SortOption = "popular" | "newest";
 
 export default function InstantSounds() {
@@ -21,6 +22,7 @@ export default function InstantSounds() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCountry, setActiveCountry] = useState<CountryFilter>("All");
+  const [activeCategory, setActiveCategory] = useState<CategoryFilter>("All");
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<number[]>([]);
@@ -48,38 +50,32 @@ export default function InstantSounds() {
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'r' || e.key === 'R') {
-        playRandomSound();
-      }
-      if (e.key === 'f' || e.key === 'F') {
-        setShowFavoritesModal(true);
-      }
+      if (e.key.toLowerCase() === 'r') playRandomSound();
+      if (e.key.toLowerCase() === 'f') setShowFavoritesModal(true);
       if (e.key === 'Escape') {
         setShowUploadModal(false);
         setShowFavoritesModal(false);
         setShowRecentModal(false);
       }
-      if (e.key === '?') {
-        toast.info("Shortcuts: R = Random | F = Favorites | Esc = Close");
-      }
+      if (e.key === '?') toast.info("Shortcuts: R = Random | F = Favorites | Esc = Close");
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [sounds]);
 
+  // Filtered sounds with category support
   const filteredSounds = sounds
     .filter(sound => {
       const matchesSearch = sound.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                             sound.category.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCountry = activeCountry === "All" || sound.country === activeCountry;
-      return matchesSearch && matchesCountry;
+      const matchesCategory = activeCategory === "All" || sound.category === activeCategory;
+      return matchesSearch && matchesCountry && matchesCategory;
     })
     .sort((a, b) => sortBy === "popular" ? b.plays - a.plays : b.id - a.id);
 
   const favoriteSounds = sounds.filter(s => favorites.includes(s.id));
 
-  // Play sound with volume control
   const playSound = (sound: Sound) => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const osc1 = audioContext.createOscillator();
@@ -112,7 +108,6 @@ export default function InstantSounds() {
       setPlayingId(null);
     }, duration);
 
-    // Add to recent plays
     setRecentPlays(prev => {
       const filtered = prev.filter(s => s.id !== sound.id);
       return [sound, ...filtered].slice(0, 8);
@@ -192,7 +187,7 @@ export default function InstantSounds() {
             <button onClick={playRandomSound} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg" title="Random (R)">
               <Shuffle size={16} /> Random
             </button>
-            <button onClick={() => setShowRecentModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg" title="Recent Plays">
+            <button onClick={() => setShowRecentModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg">
               <Clock size={16} /> Recent
             </button>
             <button onClick={() => setShowFavoritesModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg">
@@ -217,55 +212,54 @@ export default function InstantSounds() {
         </h1>
         <p className="text-zinc-400 text-lg">Click to play. No download. No signup needed.</p>
 
-        {/* Volume Control */}
         <div className="mt-6 flex items-center justify-center gap-3 text-sm">
           <Volume2 size={18} className="text-zinc-400" />
-          <input 
-            type="range" 
-            min="0.1" 
-            max="1" 
-            step="0.05" 
-            value={volume} 
-            onChange={(e) => setVolume(parseFloat(e.target.value))} 
-            className="w-40 accent-green-500" 
-          />
+          <input type="range" min="0.1" max="1" step="0.05" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="w-40 accent-green-500" />
           <span className="text-xs text-zinc-500 w-8">{Math.round(volume * 100)}%</span>
         </div>
 
         <div className="mt-4 max-w-md mx-auto relative">
           <Search className="absolute left-4 top-3.5 text-zinc-500" size={18} />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search sounds... (Press ? for shortcuts)"
-            className="w-full bg-zinc-900 border border-zinc-800 pl-11 py-3 rounded-xl text-sm focus:outline-none focus:border-green-500"
-          />
+          <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search sounds..." className="w-full bg-zinc-900 border border-zinc-800 pl-11 py-3 rounded-xl text-sm focus:outline-none focus:border-green-500" />
         </div>
       </div>
 
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-4 mb-6">
-          <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl">
-            {(["All", "US", "IN"] as const).map(c => (
+        <div className="flex flex-col gap-4 border-b border-zinc-800 pb-4 mb-6">
+          
+          {/* Country + Sort */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl">
+              {(["All", "US", "IN"] as const).map(c => (
+                <button key={c} onClick={() => setActiveCountry(c)} className={`px-5 py-1.5 text-sm rounded-lg transition-all ${activeCountry === c ? 'bg-white text-black' : 'hover:bg-zinc-800'}`}>
+                  {c === "All" ? "All" : c}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-4">
+              <select value={sortBy} onChange={e => setSortBy(e.target.value as SortOption)} className="bg-zinc-900 border border-zinc-800 px-4 py-2 text-sm rounded-xl">
+                <option value="popular">Most Popular</option>
+                <option value="newest">Newest</option>
+              </select>
+              <div className="text-sm text-zinc-400">{filteredSounds.length} sounds</div>
+            </div>
+          </div>
+
+          {/* Category Tabs (NEW) */}
+          <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl w-fit">
+            {(["All", "Memes", "Funny", "Gaming"] as const).map(cat => (
               <button
-                key={c}
-                onClick={() => setActiveCountry(c)}
-                className={`px-5 py-1.5 text-sm rounded-lg transition-all ${activeCountry === c ? 'bg-white text-black' : 'hover:bg-zinc-800'}`}
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-5 py-1.5 text-sm rounded-lg transition-all ${activeCategory === cat ? 'bg-white text-black font-medium' : 'hover:bg-zinc-800 text-zinc-300'}`}
               >
-                {c === "All" ? "All" : c}
+                {cat}
               </button>
             ))}
           </div>
 
-          <div className="flex items-center gap-4">
-            <select value={sortBy} onChange={e => setSortBy(e.target.value as SortOption)} className="bg-zinc-900 border border-zinc-800 px-4 py-2 text-sm rounded-xl">
-              <option value="popular">Most Popular</option>
-              <option value="newest">Newest</option>
-            </select>
-            <div className="text-sm text-zinc-400">{filteredSounds.length} sounds</div>
-          </div>
         </div>
       </div>
 
@@ -331,10 +325,10 @@ export default function InstantSounds() {
 
       {/* Footer */}
       <footer className="border-t border-zinc-800 py-6 text-center text-xs text-zinc-500">
-        Built on instant.blazenxt.in • Myinstants clone • Press <span className="font-mono">R</span> for random
+        Built on instant.blazenxt.in • Myinstants clone • Press R for random
       </footer>
 
-      {/* Upload Modal */}
+      {/* Modals (same as before) */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4">
           <div className="bg-zinc-900 border border-zinc-700 w-full max-w-md rounded-2xl p-6">
@@ -342,9 +336,7 @@ export default function InstantSounds() {
               <h3 className="font-semibold text-xl">Upload Sound</h3>
               <button onClick={() => setShowUploadModal(false)}><X /></button>
             </div>
-
             <input value={uploadName} onChange={e => setUploadName(e.target.value)} placeholder="Sound name" className="w-full bg-zinc-950 border border-zinc-700 px-4 py-3 rounded-xl mb-4" />
-
             <div className="grid grid-cols-2 gap-3 mb-6">
               <select value={uploadCategory} onChange={e => setUploadCategory(e.target.value)} className="bg-zinc-950 border border-zinc-700 px-4 py-3 rounded-xl">
                 <option>Memes</option><option>Funny</option><option>Gaming</option>
@@ -353,7 +345,6 @@ export default function InstantSounds() {
                 <option value="IN">India</option><option value="US">US</option>
               </select>
             </div>
-
             <div className="flex gap-3">
               <button onClick={() => setShowUploadModal(false)} className="flex-1 py-3 border border-zinc-700 rounded-xl">Cancel</button>
               <button onClick={handleUpload} className="flex-1 py-3 bg-green-500 text-black font-medium rounded-xl">Upload</button>
@@ -362,7 +353,6 @@ export default function InstantSounds() {
         </div>
       )}
 
-      {/* Favorites Modal */}
       {showFavoritesModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4">
           <div className="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-2xl overflow-hidden">
@@ -385,7 +375,6 @@ export default function InstantSounds() {
         </div>
       )}
 
-      {/* Recent Plays Modal */}
       {showRecentModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4">
           <div className="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-2xl overflow-hidden">
