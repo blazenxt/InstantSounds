@@ -5,6 +5,7 @@ import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User, X, Trendin
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import AudioUploadModal from '../components/AudioUploadModal';
+import PWAInstallButton from '../components/PWAInstallButton';
 
 interface Sound {
   id: number;
@@ -295,6 +296,8 @@ export default function InstantSounds() {
             <button onClick={() => setShowUploadModal(true)} className="flex items-center gap-1 px-2 py-1.5 hover:bg-zinc-900 rounded-lg">
               <Upload size={15} />
             </button>
+            
+            <PWAInstallButton />
             
             <button onClick={() => toast.info("Login coming soon")} className="flex items-center gap-1 px-3 py-1.5 bg-white text-black rounded-lg text-sm font-medium">
               <User size={15} />
