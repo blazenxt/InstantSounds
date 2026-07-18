@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User, X, TrendingUp, Shuffle, Volume2, Clock, Pause } from 'lucide-react';
+import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User, X, TrendingUp, Shuffle, Volume2, Clock, Pause, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Sound {
@@ -29,7 +29,6 @@ export default function InstantSounds() {
   const [recentPlays, setRecentPlays] = useState<Sound[]>([]);
   const [volume, setVolume] = useState(0.6);
   
-  // Auto-play state
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const autoPlayIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -75,14 +74,13 @@ export default function InstantSounds() {
           const randomIndex = Math.floor(Math.random() * filteredSounds.length);
           playSound(filteredSounds[randomIndex]);
         }
-      }, 2200); // Play a new sound every 2.2 seconds
+      }, 2200);
     } else {
       if (autoPlayIntervalRef.current) {
         clearInterval(autoPlayIntervalRef.current);
         autoPlayIntervalRef.current = null;
       }
     }
-
     return () => {
       if (autoPlayIntervalRef.current) clearInterval(autoPlayIntervalRef.current);
     };
@@ -100,6 +98,7 @@ export default function InstantSounds() {
 
   const favoriteSounds = sounds.filter(s => favorites.includes(s.id));
 
+  // Play sound + Increase play count
   const playSound = (sound: Sound) => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const osc1 = audioContext.createOscillator();
@@ -131,6 +130,13 @@ export default function InstantSounds() {
       osc2.stop();
       setPlayingId(null);
     }, duration);
+
+    // Increment play count
+    setSounds(prevSounds =>
+      prevSounds.map(s =>
+        s.id === sound.id ? { ...s, plays: s.plays + 1 } : s
+      )
+    );
 
     setRecentPlays(prev => {
       const filtered = prev.filter(s => s.id !== sound.id);
@@ -176,6 +182,19 @@ export default function InstantSounds() {
     }
   };
 
+  const downloadSound = (sound: Sound) => {
+    const blob = new Blob([""], { type: "audio/mpeg" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${sound.name.replace(/[^a-z0-9]/gi, '_')}.mp3`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(`Downloading: ${sound.name}`);
+  };
+
   const handleUpload = () => {
     if (!uploadName.trim()) return toast.error("Enter a name");
     
@@ -217,11 +236,7 @@ export default function InstantSounds() {
           </div>
 
           <div className="flex items-center gap-2 text-sm">
-            <button 
-              onClick={toggleAutoPlay} 
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${isAutoPlaying ? 'bg-green-600 text-white' : 'hover:bg-zinc-900'}`}
-              title="Auto Play"
-            >
+            <button onClick={toggleAutoPlay} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${isAutoPlaying ? 'bg-green-600 text-white' : 'hover:bg-zinc-900'}`} title="Auto Play">
               {isAutoPlaying ? <Pause size={16} /> : <Play size={16} />} Auto
             </button>
             <button onClick={playRandomSound} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg" title="Random (R)">
@@ -267,7 +282,6 @@ export default function InstantSounds() {
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col gap-4 border-b border-zinc-800 pb-4 mb-6">
-          
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl">
               {(["All", "US", "IN"] as const).map(c => (
@@ -286,19 +300,13 @@ export default function InstantSounds() {
             </div>
           </div>
 
-          {/* Category Tabs */}
           <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl w-fit">
             {(["All", "Memes", "Funny", "Gaming"] as const).map(cat => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-1.5 text-sm rounded-lg transition-all ${activeCategory === cat ? 'bg-white text-black font-medium' : 'hover:bg-zinc-800 text-zinc-300'}`}
-              >
+              <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-5 py-1.5 text-sm rounded-lg transition-all ${activeCategory === cat ? 'bg-white text-black font-medium' : 'hover:bg-zinc-800 text-zinc-300'}`}>
                 {cat}
               </button>
             ))}
           </div>
-
         </div>
       </div>
 
@@ -346,11 +354,19 @@ export default function InstantSounds() {
                     <button onClick={() => shareSound(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 rounded-lg">
                       <Share2 size={16} />
                     </button>
+                    <button onClick={() => downloadSound(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-green-400 rounded-lg" title="Download">
+                      <Download size={16} />
+                    </button>
                   </div>
                   
                   <a href={`/instant/${sound.slug}`} className="text-xs text-zinc-400 hover:text-white px-2 py-0.5">
                     View
                   </a>
+                </div>
+
+                {/* Play count display */}
+                <div className="text-[10px] text-zinc-500 text-right mt-1 pr-1">
+                  {sound.plays.toLocaleString()} plays
                 </div>
               </div>
             );
