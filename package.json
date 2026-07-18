@@ -14,7 +14,6 @@
     "scrape:watch": "npx tsx scripts/auto-scraper.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.109.0",
     "framer-motion": "^12.42.2",
     "lucide-react": "^1.25.0",
     "next": "16.2.10",
