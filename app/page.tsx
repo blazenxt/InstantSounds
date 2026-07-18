@@ -4,23 +4,43 @@ import React, { useState } from 'react';
 import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Sample sounds data (will be replaced with real data later)
-const initialSounds = [
-  { id: 1, name: "FAHHHHHHHHHHHHHH", slug: "fahhhhhhhhhhhhhh-3525", category: "Memes" },
-  { id: 2, name: "VINE BOOM SOUND", slug: "vine-boom-sound-70972", category: "Memes" },
-  { id: 3, name: "FAAAH", slug: "faaah-63455", category: "Memes" },
-  { id: 4, name: "Fart", slug: "fart", category: "Funny" },
-  { id: 5, name: "rizz sound effect", slug: "rizz-sound-effect-54189", category: "Memes" },
-  { id: 6, name: "Among Us role reveal sound", slug: "among-us-role-reveal-sound-34956", category: "Gaming" },
-  { id: 7, name: "BRUH", slug: "bruh", category: "Memes" },
-  { id: 8, name: "Michael Jackson Hee Hee", slug: "michael-jackson-hee-hee-40277", category: "Memes" },
-  { id: 9, name: "Metal pipe clang", slug: "metal-pipe-clang-80894", category: "Funny" },
-  { id: 10, name: "Sad Violin (the meme one)", slug: "sad-violin-the-meme-one", category: "Memes" },
-  { id: 11, name: "Taco Bell Bong", slug: "taco-bell-bong-42481", category: "Funny" },
-  { id: 12, name: "Discord Notification", slug: "discord-notification-38119", category: "Gaming" },
-  { id: 13, name: "SpongeBob Fail", slug: "spongebob-fail-11236", category: "Memes" },
-  { id: 14, name: "Chicken on tree screaming", slug: "chicken-on-tree-screaming-53890", category: "Funny" },
-  { id: 15, name: "YO PHONE IS RINGING", slug: "yo-phone-is-ringing-56694", category: "Memes" },
+// Enhanced sounds data (30+ sounds)
+const allSounds = [
+  // US Trending
+  { id: 1, name: "FAHHHHHHHHHHHHHH", slug: "fahhhhhhhhhhhhhh-3525", category: "Memes", country: "US" },
+  { id: 2, name: "VINE BOOM SOUND", slug: "vine-boom-sound-70972", category: "Memes", country: "US" },
+  { id: 3, name: "FAAAH", slug: "faaah-63455", category: "Memes", country: "US" },
+  { id: 4, name: "BRUH", slug: "bruh", category: "Memes", country: "US" },
+  { id: 5, name: "rizz sound effect", slug: "rizz-sound-effect-54189", category: "Memes", country: "US" },
+  { id: 6, name: "Among Us role reveal sound", slug: "among-us-role-reveal-sound-34956", category: "Gaming", country: "US" },
+  { id: 7, name: "Michael Jackson Hee Hee", slug: "michael-jackson-hee-hee-40277", category: "Memes", country: "US" },
+  { id: 8, name: "Metal pipe clang", slug: "metal-pipe-clang-80894", category: "Funny", country: "US" },
+  { id: 9, name: "Sad Violin (the meme one)", slug: "sad-violin-the-meme-one", category: "Memes", country: "US" },
+  { id: 10, name: "Taco Bell Bong", slug: "taco-bell-bong-42481", category: "Funny", country: "US" },
+
+  // India Trending
+  { id: 11, name: "Fart", slug: "fart", category: "Funny", country: "IN" },
+  { id: 12, name: "Discord Notification", slug: "discord-notification-38119", category: "Gaming", country: "IN" },
+  { id: 13, name: "SpongeBob Fail", slug: "spongebob-fail-11236", category: "Memes", country: "IN" },
+  { id: 14, name: "Chicken on tree screaming", slug: "chicken-on-tree-screaming-53890", category: "Funny", country: "IN" },
+  { id: 15, name: "YO PHONE IS RINGING", slug: "yo-phone-is-ringing-56694", category: "Memes", country: "IN" },
+  { id: 16, name: "Du bist gut genug", slug: "du-bist-gut-genug-22336", category: "Memes", country: "IN" },
+  { id: 17, name: "Error SOUNDSS", slug: "error-soundss-25534", category: "Funny", country: "IN" },
+  { id: 18, name: "Long brain fart", slug: "long-brain-fart-60967", category: "Funny", country: "IN" },
+  { id: 19, name: "Punch Sound", slug: "punch-sound-86161", category: "Funny", country: "IN" },
+  { id: 20, name: "spiderman meme song", slug: "spiderman-meme-song-37638", category: "Memes", country: "IN" },
+
+  // Extra Popular Sounds
+  { id: 21, name: "Dexter meme", slug: "dexter-meme-26140", category: "Memes", country: "US" },
+  { id: 22, name: "What a good boy", slug: "what-a-good-boy-58925", category: "Funny", country: "US" },
+  { id: 23, name: "ACK", slug: "ack-87763", category: "Memes", country: "US" },
+  { id: 24, name: "Gay, gay, gay, gay…", slug: "gay-gay-gay-gay-81081", category: "Memes", country: "US" },
+  { id: 25, name: "dun dun dunnnnnnnn", slug: "dun-dun-dunnnnnnnn-68584", category: "Memes", country: "US" },
+  { id: 26, name: "The Undertaker Bell", slug: "the-undertaker-bell-30938", category: "Memes", country: "IN" },
+  { id: 27, name: "ding sound effect", slug: "ding-sound-effect", category: "Funny", country: "IN" },
+  { id: 28, name: "romanceeeeeeeeeeeeee", slug: "romanceeeeeeeeeeeeee-29042", category: "Memes", country: "IN" },
+  { id: 29, name: "Bone Crack", slug: "bone-crack-23901", category: "Funny", country: "US" },
+  { id: 30, name: "Anime Wow", slug: "anime-wow", category: "Memes", country: "IN" },
 ];
 
 interface Sound {
@@ -28,52 +48,75 @@ interface Sound {
   name: string;
   slug: string;
   category: string;
+  country: string;
 }
 
+type CountryFilter = "All" | "US" | "IN";
+
 export default function InstantSounds() {
-  const [sounds, setSounds] = useState<Sound[]>(initialSounds);
+  const [sounds] = useState<Sound[]>(allSounds);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeCountry, setActiveCountry] = useState<CountryFilter>("All");
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<number[]>([]);
 
-  // Filter sounds based on search
-  const filteredSounds = sounds.filter(sound =>
-    sound.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sound.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Play sound (using Web Audio API with a placeholder tone for now)
-  const playSound = (sound: Sound) => {
-    // In a real app, this would play actual audio from Supabase
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.value = 220 + (sound.id % 8) * 40;
+  // Filter sounds
+  const filteredSounds = sounds.filter(sound => {
+    const matchesSearch = 
+      sound.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sound.category.toLowerCase().includes(searchTerm.toLowerCase());
     
-    gainNode.gain.value = 0.3;
+    const matchesCountry = activeCountry === "All" || sound.country === activeCountry;
+    
+    return matchesSearch && matchesCountry;
+  });
 
+  // Play sound with improved simulation
+  const playSound = (sound: Sound) => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Create a more realistic meme sound using multiple oscillators
+    const oscillator1 = audioContext.createOscillator();
+    const oscillator2 = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
     const filter = audioContext.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 800;
 
-    oscillator.connect(filter);
+    oscillator1.type = 'sawtooth';
+    oscillator2.type = 'square';
+    
+    // Different frequencies based on sound ID for variety
+    const baseFreq = 180 + (sound.id % 12) * 35;
+    oscillator1.frequency.value = baseFreq;
+    oscillator2.frequency.value = baseFreq * 1.5;
+
+    filter.type = 'lowpass';
+    filter.frequency.value = 1200;
+
+    gainNode.gain.value = 0.25;
+
+    // Connect nodes
+    const merger = audioContext.createChannelMerger(2);
+    oscillator1.connect(filter);
+    oscillator2.connect(filter);
     filter.connect(gainNode);
     gainNode.connect(audioContext.destination);
 
-    oscillator.start();
+    oscillator1.start();
+    oscillator2.start();
 
     setPlayingId(sound.id);
+
+    // Stop after realistic duration (0.8s - 1.6s)
+    const duration = 800 + (sound.id % 5) * 160;
     
-    // Stop after 1.2 seconds (simulating short meme sound)
     setTimeout(() => {
-      oscillator.stop();
+      oscillator1.stop();
+      oscillator2.stop();
       setPlayingId(null);
-    }, 1200);
+    }, duration);
 
     toast.success(`Playing: ${sound.name}`, {
-      duration: 1200,
+      duration: duration,
     });
   };
 
@@ -107,10 +150,9 @@ export default function InstantSounds() {
           url: url,
         });
       } catch (error) {
-        // User cancelled share
+        // User cancelled
       }
     } else {
-      // Fallback to copy
       copyLink(sound);
     }
   };
@@ -176,22 +218,39 @@ export default function InstantSounds() {
         </div>
       </div>
 
-      {/* Stats Bar */}
+      {/* Country Tabs + Stats */}
       <div className="max-w-7xl mx-auto px-6 mb-8">
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-6">
-          <div className="flex items-center gap-8 text-sm">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-800 pb-6">
+          
+          {/* Country Filter Tabs */}
+          <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded-2xl p-1">
+            {(["All", "US", "IN"] as const).map((country) => (
+              <button
+                key={country}
+                onClick={() => setActiveCountry(country)}
+                className={`px-6 py-2 text-sm font-medium rounded-xl transition-all ${
+                  activeCountry === country 
+                    ? "bg-white text-black shadow" 
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                }`}
+              >
+                {country === "All" ? "🌍 All" : country === "US" ? "🇺🇸 US" : "🇮🇳 India"}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between md:justify-end gap-8 text-sm">
             <div>
-              <span className="font-mono text-2xl font-semibold text-green-400">15,482</span>
+              <span className="font-mono text-2xl font-semibold text-green-400">30,284</span>
               <span className="ml-2 text-zinc-400">sounds</span>
             </div>
             <div>
-              <span className="font-mono text-2xl font-semibold text-green-400">2.4m</span>
+              <span className="font-mono text-2xl font-semibold text-green-400">4.8m</span>
               <span className="ml-2 text-zinc-400">plays today</span>
             </div>
-          </div>
-          
-          <div className="text-sm text-zinc-400">
-            Showing {filteredSounds.length} sounds
+            <div className="text-sm text-zinc-400 hidden md:block">
+              Showing {filteredSounds.length} sounds
+            </div>
           </div>
         </div>
       </div>
@@ -200,7 +259,7 @@ export default function InstantSounds() {
       <div className="max-w-7xl mx-auto px-6 pb-24">
         {filteredSounds.length === 0 ? (
           <div className="text-center py-16 text-zinc-400">
-            No sounds found for "{searchTerm}"
+            No sounds found for &quot;{searchTerm}&quot;
           </div>
         ) : (
           <div className="sound-grid">
@@ -229,7 +288,12 @@ export default function InstantSounds() {
                       <div className="font-semibold text-lg leading-tight pr-2">
                         {sound.name}
                       </div>
-                      <div className="text-xs text-zinc-500 mt-1">{sound.category}</div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="text-xs text-zinc-500">{sound.category}</div>
+                        <div className="text-[10px] px-1.5 py-0.5 bg-zinc-800 rounded text-zinc-400">
+                          {sound.country}
+                        </div>
+                      </div>
                     </div>
                   </button>
 
