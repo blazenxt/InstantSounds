@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User, X, TrendingUp } from 'lucide-react';
+import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User, X, TrendingUp, Shuffle, Volume2, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Sound {
@@ -24,14 +24,17 @@ export default function InstantSounds() {
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<number[]>([]);
+  const [recentPlays, setRecentPlays] = useState<Sound[]>([]);
+  const [volume, setVolume] = useState(0.6);
   
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
+  const [showRecentModal, setShowRecentModal] = useState(false);
   const [uploadName, setUploadName] = useState("");
   const [uploadCategory, setUploadCategory] = useState("Memes");
   const [uploadCountry, setUploadCountry] = useState<"US" | "IN">("IN");
 
-  // Load sounds from JSON (scraped data)
+  // Load sounds
   useEffect(() => {
     fetch('/data/sounds.json')
       .then(res => res.json())
@@ -39,12 +42,31 @@ export default function InstantSounds() {
         setSounds(data);
         setLoading(false);
       })
-      .catch(() => {
-        // Fallback if JSON fails
-        setSounds([]);
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, []);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'r' || e.key === 'R') {
+        playRandomSound();
+      }
+      if (e.key === 'f' || e.key === 'F') {
+        setShowFavoritesModal(true);
+      }
+      if (e.key === 'Escape') {
+        setShowUploadModal(false);
+        setShowFavoritesModal(false);
+        setShowRecentModal(false);
+      }
+      if (e.key === '?') {
+        toast.info("Shortcuts: R = Random | F = Favorites | Esc = Close");
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [sounds]);
 
   const filteredSounds = sounds
     .filter(sound => {
@@ -57,6 +79,7 @@ export default function InstantSounds() {
 
   const favoriteSounds = sounds.filter(s => favorites.includes(s.id));
 
+  // Play sound with volume control
   const playSound = (sound: Sound) => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const osc1 = audioContext.createOscillator();
@@ -70,7 +93,7 @@ export default function InstantSounds() {
     osc2.frequency.value = osc1.frequency.value * 1.5;
     filter.type = 'lowpass';
     filter.frequency.value = 1200;
-    gain.gain.value = 0.25;
+    gain.gain.value = volume;
 
     osc1.connect(filter);
     osc2.connect(filter);
@@ -89,7 +112,19 @@ export default function InstantSounds() {
       setPlayingId(null);
     }, duration);
 
+    // Add to recent plays
+    setRecentPlays(prev => {
+      const filtered = prev.filter(s => s.id !== sound.id);
+      return [sound, ...filtered].slice(0, 8);
+    });
+
     toast.success(`Playing: ${sound.name}`);
+  };
+
+  const playRandomSound = () => {
+    if (filteredSounds.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * filteredSounds.length);
+    playSound(filteredSounds[randomIndex]);
   };
 
   const toggleFavorite = (id: number) => {
@@ -133,11 +168,7 @@ export default function InstantSounds() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white">
-        <div>Loading sounds...</div>
-      </div>
-    );
+    return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white">Loading sounds...</div>;
   }
 
   return (
@@ -158,6 +189,12 @@ export default function InstantSounds() {
           </div>
 
           <div className="flex items-center gap-2 text-sm">
+            <button onClick={playRandomSound} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg" title="Random (R)">
+              <Shuffle size={16} /> Random
+            </button>
+            <button onClick={() => setShowRecentModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg" title="Recent Plays">
+              <Clock size={16} /> Recent
+            </button>
             <button onClick={() => setShowFavoritesModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg">
               <Heart size={16} /> Favorites
             </button>
@@ -180,13 +217,28 @@ export default function InstantSounds() {
         </h1>
         <p className="text-zinc-400 text-lg">Click to play. No download. No signup needed.</p>
 
-        <div className="mt-8 max-w-md mx-auto relative">
+        {/* Volume Control */}
+        <div className="mt-6 flex items-center justify-center gap-3 text-sm">
+          <Volume2 size={18} className="text-zinc-400" />
+          <input 
+            type="range" 
+            min="0.1" 
+            max="1" 
+            step="0.05" 
+            value={volume} 
+            onChange={(e) => setVolume(parseFloat(e.target.value))} 
+            className="w-40 accent-green-500" 
+          />
+          <span className="text-xs text-zinc-500 w-8">{Math.round(volume * 100)}%</span>
+        </div>
+
+        <div className="mt-4 max-w-md mx-auto relative">
           <Search className="absolute left-4 top-3.5 text-zinc-500" size={18} />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search sounds..."
+            placeholder="Search sounds... (Press ? for shortcuts)"
             className="w-full bg-zinc-900 border border-zinc-800 pl-11 py-3 rounded-xl text-sm focus:outline-none focus:border-green-500"
           />
         </div>
@@ -279,7 +331,7 @@ export default function InstantSounds() {
 
       {/* Footer */}
       <footer className="border-t border-zinc-800 py-6 text-center text-xs text-zinc-500">
-        Built on instant.blazenxt.in • Myinstants clone
+        Built on instant.blazenxt.in • Myinstants clone • Press <span className="font-mono">R</span> for random
       </footer>
 
       {/* Upload Modal */}
@@ -328,6 +380,26 @@ export default function InstantSounds() {
                   </div>
                 </div>
               )) : <div className="py-8 text-center text-zinc-400">No favorites yet</div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Recent Plays Modal */}
+      {showRecentModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-4">
+          <div className="bg-zinc-900 border border-zinc-700 w-full max-w-lg rounded-2xl overflow-hidden">
+            <div className="p-5 border-b border-zinc-700 flex justify-between">
+              <div className="font-semibold">Recently Played</div>
+              <button onClick={() => setShowRecentModal(false)}><X /></button>
+            </div>
+            <div className="max-h-[60vh] overflow-auto p-4">
+              {recentPlays.length > 0 ? recentPlays.map(s => (
+                <div key={s.id} className="flex justify-between items-center py-3 border-b border-zinc-800 last:border-none">
+                  <div>{s.name}</div>
+                  <button onClick={() => playSound(s)} className="text-green-400"><Play size={16} /></button>
+                </div>
+              )) : <div className="py-8 text-center text-zinc-400">No recent plays yet</div>}
             </div>
           </div>
         </div>
