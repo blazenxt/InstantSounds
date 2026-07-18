@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User, X, TrendingUp, Shuffle, Volume2, Clock, Pause, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import AudioUploadModal from '../components/AudioUploadModal';
-import PWAInstallButton from '../components/PWAInstallButton';
+import PWAInstallButton from './components/PWAInstallButton';
+import KeyboardShortcuts from './components/KeyboardShortcuts';
 
 interface Sound {
   id: number;
