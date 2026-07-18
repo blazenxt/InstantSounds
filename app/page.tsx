@@ -1,41 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Heart, Link as LinkIcon, Share2, Search, Upload, User, X, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
-
-const allSounds = [
-  { id: 1, name: "FAHHHHHHHHHHHHHH", slug: "fahhhhhhhhhhhhhh-3525", category: "Memes", country: "US", plays: 124000 },
-  { id: 2, name: "VINE BOOM SOUND", slug: "vine-boom-sound-70972", category: "Memes", country: "US", plays: 289000 },
-  { id: 3, name: "FAAAH", slug: "faaah-63455", category: "Memes", country: "US", plays: 97000 },
-  { id: 4, name: "BRUH", slug: "bruh", category: "Memes", country: "US", plays: 312000 },
-  { id: 5, name: "rizz sound effect", slug: "rizz-sound-effect-54189", category: "Memes", country: "US", plays: 145000 },
-  { id: 6, name: "Among Us role reveal sound", slug: "among-us-role-reveal-sound-34956", category: "Gaming", country: "US", plays: 89000 },
-  { id: 7, name: "Michael Jackson Hee Hee", slug: "michael-jackson-hee-hee-40277", category: "Memes", country: "US", plays: 76000 },
-  { id: 8, name: "Metal pipe clang", slug: "metal-pipe-clang-80894", category: "Funny", country: "US", plays: 213000 },
-  { id: 9, name: "Sad Violin (the meme one)", slug: "sad-violin-the-meme-one", category: "Memes", country: "US", plays: 178000 },
-  { id: 10, name: "Taco Bell Bong", slug: "taco-bell-bong-42481", category: "Funny", country: "US", plays: 134000 },
-  { id: 11, name: "Fart", slug: "fart", category: "Funny", country: "IN", plays: 267000 },
-  { id: 12, name: "Discord Notification", slug: "discord-notification-38119", category: "Gaming", country: "IN", plays: 98000 },
-  { id: 13, name: "SpongeBob Fail", slug: "spongebob-fail-11236", category: "Memes", country: "IN", plays: 165000 },
-  { id: 14, name: "Chicken on tree screaming", slug: "chicken-on-tree-screaming-53890", category: "Funny", country: "IN", plays: 82000 },
-  { id: 15, name: "YO PHONE IS RINGING", slug: "yo-phone-is-ringing-56694", category: "Memes", country: "IN", plays: 194000 },
-  { id: 16, name: "Du bist gut genug", slug: "du-bist-gut-genug-22336", category: "Memes", country: "IN", plays: 73000 },
-  { id: 17, name: "Error SOUNDSS", slug: "error-soundss-25534", category: "Funny", country: "IN", plays: 112000 },
-  { id: 18, name: "Long brain fart", slug: "long-brain-fart-60967", category: "Funny", country: "IN", plays: 67000 },
-  { id: 19, name: "Punch Sound", slug: "punch-sound-86161", category: "Funny", country: "IN", plays: 54000 },
-  { id: 20, name: "spiderman meme song", slug: "spiderman-meme-song-37638", category: "Memes", country: "IN", plays: 158000 },
-  { id: 21, name: "Dexter meme", slug: "dexter-meme-26140", category: "Memes", country: "US", plays: 92000 },
-  { id: 22, name: "What a good boy", slug: "what-a-good-boy-58925", category: "Funny", country: "US", plays: 78000 },
-  { id: 23, name: "ACK", slug: "ack-87763", category: "Memes", country: "US", plays: 61000 },
-  { id: 24, name: "Gay, gay, gay, gay…", slug: "gay-gay-gay-gay-81081", category: "Memes", country: "US", plays: 143000 },
-  { id: 25, name: "dun dun dunnnnnnnn", slug: "dun-dun-dunnnnnnnn-68584", category: "Memes", country: "US", plays: 87000 },
-  { id: 26, name: "The Undertaker Bell", slug: "the-undertaker-bell-30938", category: "Memes", country: "IN", plays: 119000 },
-  { id: 27, name: "ding sound effect", slug: "ding-sound-effect", category: "Funny", country: "IN", plays: 45000 },
-  { id: 28, name: "romanceeeeeeeeeeeeee", slug: "romanceeeeeeeeeeeeee-29042", category: "Memes", country: "IN", plays: 104000 },
-  { id: 29, name: "Bone Crack", slug: "bone-crack-23901", category: "Funny", country: "US", plays: 59000 },
-  { id: 30, name: "Anime Wow", slug: "anime-wow", category: "Memes", country: "IN", plays: 127000 },
-];
 
 interface Sound {
   id: number;
@@ -50,7 +17,8 @@ type CountryFilter = "All" | "US" | "IN";
 type SortOption = "popular" | "newest";
 
 export default function InstantSounds() {
-  const [sounds, setSounds] = useState<Sound[]>(allSounds);
+  const [sounds, setSounds] = useState<Sound[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCountry, setActiveCountry] = useState<CountryFilter>("All");
   const [sortBy, setSortBy] = useState<SortOption>("popular");
@@ -62,6 +30,21 @@ export default function InstantSounds() {
   const [uploadName, setUploadName] = useState("");
   const [uploadCategory, setUploadCategory] = useState("Memes");
   const [uploadCountry, setUploadCountry] = useState<"US" | "IN">("IN");
+
+  // Load sounds from JSON (scraped data)
+  useEffect(() => {
+    fetch('/data/sounds.json')
+      .then(res => res.json())
+      .then(data => {
+        setSounds(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        // Fallback if JSON fails
+        setSounds([]);
+        setLoading(false);
+      });
+  }, []);
 
   const filteredSounds = sounds
     .filter(sound => {
@@ -149,9 +132,17 @@ export default function InstantSounds() {
     setTimeout(() => playSound(newSound), 500);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white">
+        <div>Loading sounds...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Navbar - Classic Myinstants style */}
+      {/* Navbar */}
       <nav className="border-b border-zinc-800 bg-[#0a0a0a]">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -167,22 +158,13 @@ export default function InstantSounds() {
           </div>
 
           <div className="flex items-center gap-2 text-sm">
-            <button 
-              onClick={() => setShowFavoritesModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg"
-            >
+            <button onClick={() => setShowFavoritesModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg">
               <Heart size={16} /> Favorites
             </button>
-            <button 
-              onClick={() => setShowUploadModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg"
-            >
+            <button onClick={() => setShowUploadModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-zinc-900 rounded-lg">
               <Upload size={16} /> Upload
             </button>
-            <button 
-              onClick={() => toast.info("Login coming soon")}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-black rounded-lg text-sm font-medium"
-            >
+            <button onClick={() => toast.info("Login coming soon")} className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-black rounded-lg text-sm font-medium">
               <User size={16} /> Login
             </button>
           </div>
@@ -198,7 +180,6 @@ export default function InstantSounds() {
         </h1>
         <p className="text-zinc-400 text-lg">Click to play. No download. No signup needed.</p>
 
-        {/* Search */}
         <div className="mt-8 max-w-md mx-auto relative">
           <Search className="absolute left-4 top-3.5 text-zinc-500" size={18} />
           <input
@@ -214,7 +195,6 @@ export default function InstantSounds() {
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-4 mb-6">
-          {/* Country Tabs */}
           <div className="flex gap-1 bg-zinc-900 p-1 rounded-xl">
             {(["All", "US", "IN"] as const).map(c => (
               <button
@@ -228,11 +208,7 @@ export default function InstantSounds() {
           </div>
 
           <div className="flex items-center gap-4">
-            <select 
-              value={sortBy} 
-              onChange={e => setSortBy(e.target.value as SortOption)}
-              className="bg-zinc-900 border border-zinc-800 px-4 py-2 text-sm rounded-xl"
-            >
+            <select value={sortBy} onChange={e => setSortBy(e.target.value as SortOption)} className="bg-zinc-900 border border-zinc-800 px-4 py-2 text-sm rounded-xl">
               <option value="popular">Most Popular</option>
               <option value="newest">Newest</option>
             </select>
@@ -248,18 +224,14 @@ export default function InstantSounds() {
         </div>
         <div className="flex gap-2 overflow-x-auto pb-2">
           {sounds.slice(0, 6).map(sound => (
-            <button 
-              key={sound.id} 
-              onClick={() => playSound(sound)}
-              className="text-sm whitespace-nowrap px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg"
-            >
+            <button key={sound.id} onClick={() => playSound(sound)} className="text-sm whitespace-nowrap px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg">
               {sound.name}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Sound Grid - Classic Myinstants style */}
+      {/* Sound Grid */}
       <div className="max-w-7xl mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {filteredSounds.map(sound => {
@@ -268,10 +240,7 @@ export default function InstantSounds() {
 
             return (
               <div key={sound.id} className="border border-zinc-800 bg-zinc-900 rounded-xl p-4 flex flex-col">
-                <button 
-                  onClick={() => playSound(sound)}
-                  className="flex-1 flex items-center gap-3 bg-zinc-950 hover:bg-zinc-800 active:bg-zinc-700 border border-zinc-800 px-4 py-4 rounded-lg text-left transition-colors"
-                >
+                <button onClick={() => playSound(sound)} className="flex-1 flex items-center gap-3 bg-zinc-950 hover:bg-zinc-800 active:bg-zinc-700 border border-zinc-800 px-4 py-4 rounded-lg text-left transition-colors">
                   <div className="w-9 h-9 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0">
                     <Play size={18} className="text-black" fill="currentColor" />
                   </div>
@@ -322,12 +291,7 @@ export default function InstantSounds() {
               <button onClick={() => setShowUploadModal(false)}><X /></button>
             </div>
 
-            <input 
-              value={uploadName} 
-              onChange={e => setUploadName(e.target.value)} 
-              placeholder="Sound name" 
-              className="w-full bg-zinc-950 border border-zinc-700 px-4 py-3 rounded-xl mb-4" 
-            />
+            <input value={uploadName} onChange={e => setUploadName(e.target.value)} placeholder="Sound name" className="w-full bg-zinc-950 border border-zinc-700 px-4 py-3 rounded-xl mb-4" />
 
             <div className="grid grid-cols-2 gap-3 mb-6">
               <select value={uploadCategory} onChange={e => setUploadCategory(e.target.value)} className="bg-zinc-950 border border-zinc-700 px-4 py-3 rounded-xl">

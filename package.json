@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "scrape": "npx tsx scripts/scraper.ts",
+    "scrape:watch": "npx tsx scripts/auto-scraper.ts"
   },
   "dependencies": {
     "lucide-react": "^1.25.0",

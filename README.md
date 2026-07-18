@@ -3,6 +3,8 @@
 **Live Demo:** [instant.blazenxt.in](https://instant.blazenxt.in)  
 **GitHub:** https://github.com/blazenxt/InstantSounds
 
+> Powered by **auto-scraper** — automatically fetches new sounds from Myinstants every 6 hours.
+
 A beautiful, fully functional clone of **Myinstants.com** — the largest instant sound buttons website.
 
 Built with Next.js 16 + TypeScript + Tailwind.
