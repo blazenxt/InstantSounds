@@ -226,9 +226,7 @@ export default function InstantSounds() {
         <div className="max-w-7xl mx-auto px-3 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
-                <span className="font-bold text-black text-lg">IS</span>
-              </div>
+              <img src="/logo.png" alt="InstantSounds" className="w-9 h-9 rounded-xl" />
               <div>
                 <span className="font-bold text-lg">InstantSounds</span>
               </div>

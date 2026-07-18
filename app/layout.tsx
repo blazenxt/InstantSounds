@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   title: "InstantSounds | instant.blazenxt.in",
   description: "The largest instant sound buttons website. Play meme sounds instantly.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.png",
   },
   manifest: "/manifest.json",
 };
