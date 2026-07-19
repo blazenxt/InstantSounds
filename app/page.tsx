@@ -35,6 +35,11 @@ export default function InstantSounds() {
   const [recentPlays, setRecentPlays] = useState<Sound[]>([]);
   const [volume, setVolume] = useState(0.6);
 
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+    localStorage.setItem('volume', newVolume.toString());
+  };
+
   // Load from localStorage on mount
   useEffect(() => {
     const savedVolume = localStorage.getItem('volume');
@@ -321,7 +326,7 @@ export default function InstantSounds() {
 
         <div className="mt-5 flex items-center justify-center gap-3 text-sm">
           <Volume2 size={17} className="text-zinc-400" />
-          <input type="range" min="0.1" max="1" step="0.05" value={volume} onChange={(e) => handleVolumeChange(parseFloat(e.target.value))} className="w-36 accent-green-500" />
+          <input type="range" min="0.1" max="1" step="0.05" value={volume} onChange={(e) => { const v = parseFloat(e.target.value); setVolume(v); localStorage.setItem('volume', v.toString()); }} className="w-36 accent-green-500" />
           <span className="text-xs text-zinc-500 w-8">{Math.round(volume * 100)}%</span>
         </div>
 
