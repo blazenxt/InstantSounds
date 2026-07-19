@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Share2, Twitter, MessageCircle } from 'lucide-react';
+import { Share2, X, MessageCircle } from 'lucide-react';
 
 interface ShareButtonsProps {
   url: string;
@@ -30,9 +30,9 @@ export default function ShareButtons({ url, title }: ShareButtonsProps) {
       <button 
         onClick={shareToTwitter}
         className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
-        title="Share on Twitter"
+        title="Share on Twitter/X"
       >
-        <Twitter size={16} />
+        <X size={16} />
       </button>
       <button 
         onClick={shareToWhatsApp}
