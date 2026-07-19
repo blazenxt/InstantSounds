@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import PWAInstallButton from './components/PWAInstallButton';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
+import RealAudioUpload from './components/RealAudioUpload';
 import ShareButtons from './components/ShareButtons';
 
 interface Sound {
@@ -49,7 +50,7 @@ export default function InstantSounds() {
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const autoPlayIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showRealUploadModal, setShowRealUploadModal] = useState(false);
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
   const [showRecentModal, setShowRecentModal] = useState(false);
   const [uploadName, setUploadName] = useState("");
@@ -222,23 +223,10 @@ export default function InstantSounds() {
     toast.success(`Downloading: ${sound.name}`);
   };
 
-  const handleUpload = () => {
-    if (!uploadName.trim()) return toast.error("Enter a name");
-    
-    const newSound: Sound = {
-      id: Date.now(),
-      name: uploadName.trim(),
-      slug: uploadName.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now(),
-      category: uploadCategory,
-      country: uploadCountry,
-      plays: 0,
-    };
-    
+  // Handle real audio upload
+  const handleRealAudioUpload = (newSound: any) => {
     setSounds([newSound, ...sounds]);
-    setUploadName("");
-    setShowUploadModal(false);
-    toast.success("Sound uploaded!");
-    setTimeout(() => playSound(newSound), 500);
+    toast.success("Real audio uploaded!");
   };
 
   // Skeleton Loading
@@ -309,7 +297,7 @@ export default function InstantSounds() {
               <span className="hidden sm:inline">Fav</span>
             </button>
             
-            <button onClick={() => setShowUploadModal(true)} className="flex items-center gap-1 px-2 py-1.5 hover:bg-zinc-900 rounded-lg">
+            <button onClick={() => setShowRealUploadModal(true)} className="flex items-center gap-1 px-2 py-1.5 hover:bg-zinc-900 rounded-lg">
               <Upload size={15} />
             </button>
             
@@ -572,6 +560,13 @@ export default function InstantSounds() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Real Audio Upload Modal */}
+      <RealAudioUpload 
+        isOpen={showRealUploadModal} 
+        onClose={() => setShowRealUploadModal(false)} 
+        onUploadSuccess={handleRealAudioUpload} 
+      />
     </div>
   );
 }
