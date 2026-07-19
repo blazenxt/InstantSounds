@@ -82,7 +82,7 @@ export default function InstantSounds() {
       if (e.key.toLowerCase() === 'r') playRandomSound();
       if (e.key.toLowerCase() === 'f') setShowFavoritesModal(true);
       if (e.key === 'Escape') {
-        setShowUploadModal(false);
+        setShowRealUploadModal(false);
         setShowFavoritesModal(false);
         setShowRecentModal(false);
       }
