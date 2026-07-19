@@ -32,6 +32,18 @@ export default function InstantSounds() {
   const [favorites, setFavorites] = useState<number[]>([]);
   const [recentPlays, setRecentPlays] = useState<Sound[]>([]);
   const [volume, setVolume] = useState(0.6);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const savedVolume = localStorage.getItem('volume');
+    if (savedVolume) setVolume(parseFloat(savedVolume));
+
+    const savedFavorites = localStorage.getItem('favorites');
+    if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
+
+    const savedRecent = localStorage.getItem('recentPlays');
+    if (savedRecent) setRecentPlays(JSON.parse(savedRecent));
+  }, []);
   
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const autoPlayIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -149,10 +161,9 @@ export default function InstantSounds() {
       )
     );
 
-    setRecentPlays(prev => {
-      const filtered = prev.filter(s => s.id !== sound.id);
-      return [sound, ...filtered].slice(0, 8);
-    });
+    const newRecent = [sound, ...recentPlays.filter(s => s.id !== sound.id)].slice(0, 8);
+    setRecentPlays(newRecent);
+    localStorage.setItem('recentPlays', JSON.stringify(newRecent));
 
     toast.success(`Playing: ${sound.name}`);
   };
@@ -173,9 +184,13 @@ export default function InstantSounds() {
   };
 
   const toggleFavorite = (id: number) => {
-    setFavorites(favorites.includes(id) 
+    const newFavorites = favorites.includes(id) 
       ? favorites.filter(f => f !== id) 
-      : [...favorites, id]);
+      : [...favorites, id];
+    
+    setFavorites(newFavorites);
+    localStorage.setItem('favorites', JSON.stringify(newFavorites));
+    
     toast(favorites.includes(id) ? "Removed from favorites" : "Added to favorites ❤️");
   };
 
@@ -317,7 +332,7 @@ export default function InstantSounds() {
 
         <div className="mt-5 flex items-center justify-center gap-3 text-sm">
           <Volume2 size={17} className="text-zinc-400" />
-          <input type="range" min="0.1" max="1" step="0.05" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="w-36 accent-green-500" />
+          <input type="range" min="0.1" max="1" step="0.05" value={volume} onChange={(e) => handleVolumeChange(parseFloat(e.target.value))} className="w-36 accent-green-500" />
           <span className="text-xs text-zinc-500 w-8">{Math.round(volume * 100)}%</span>
         </div>
 
