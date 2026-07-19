@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import PWAInstallButton from './components/PWAInstallButton';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
+import ShareButtons from './components/ShareButtons';
 
 interface Sound {
   id: number;
@@ -443,9 +444,17 @@ export default function InstantSounds() {
                       <button onClick={() => copyLink(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 rounded-lg transition-colors">
                         <LinkIcon size={15} />
                       </button>
-                      <button onClick={() => shareSound(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 rounded-lg transition-colors">
-                        <Share2 size={15} />
-                      </button>
+                      <div className="relative group">
+                        <button className="p-1.5 text-zinc-400 hover:bg-zinc-800 rounded-lg transition-colors">
+                          <Share2 size={15} />
+                        </button>
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50">
+                          <ShareButtons 
+                            url={`https://instant.blazenxt.in/instant/${sound.slug}`} 
+                            title={sound.name} 
+                          />
+                        </div>
+                      </div>
                       <button onClick={() => downloadSound(sound)} className="p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-green-400 rounded-lg transition-colors">
                         <Download size={15} />
                       </button>
